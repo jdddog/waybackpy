@@ -9,8 +9,8 @@ from .utils import (
     _check_match_type,
     _add_payload,
 )
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# TODO : Threading support for pagination API. It's designed for Threading.
 # TODO : Add get method here if type is Vaild HTML, SVG other but not - or warc. Test it.
 
 
@@ -26,6 +26,7 @@ class Cdx:
         gzip=None,
         collapses=[],
         limit=None,
+        n_threads: int = 4,
     ):
         self.url = str(url).strip()
         self.user_agent = str(user_agent) if user_agent else default_user_agent
@@ -41,6 +42,7 @@ class Cdx:
         self.limit = limit if limit else 5000
         self.last_api_request_url = None
         self.use_page = False
+        self.n_threads = n_threads
 
     def cdx_api_manager(self, payload, headers, use_page=False):
         """Act as button, we can choose between the normal API and pagination API.
@@ -102,23 +104,30 @@ class Cdx:
         total_pages = _get_total_pages(self.url, self.user_agent)
         # If we only have two or less pages of archives then we care for accuracy
         # pagination API can be lagged sometimes
-        if use_page == True and total_pages >= 2:
-            blank_pages = 0
-            for i in range(total_pages):
-                payload["page"] = str(i)
-                url, res = _get_response(
-                    endpoint, params=payload, headers=headers, return_full_url=True
-                )
+        if use_page is True and total_pages >= 2:
+            # blank_pages = 0
+            futures = []
+            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
+                for i in range(total_pages):
+                    payload["page"] = str(i)
+                    future = executor.submit(_get_response,
+                                             endpoint,
+                                             params=payload,
+                                             headers=headers,
+                                             return_full_url=True)
+                    futures.append(future)
 
-                self.last_api_request_url = url
-                text = res.text
-                if len(text) == 0:
-                    blank_pages += 1
+                for future in as_completed(futures):
+                    url, res = future.result()
+                    self.last_api_request_url = url
+                    text = res.text
+                    # if len(text) == 0:
+                    #     blank_pages += 1
+                    #
+                    # if blank_pages >= 2:
+                    #     break
 
-                if blank_pages >= 2:
-                    break
-
-                yield text
+                    yield text
         else:
 
             payload["showResumeKey"] = "true"
