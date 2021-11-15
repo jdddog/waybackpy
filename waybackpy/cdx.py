@@ -1,5 +1,7 @@
-from .snapshot import CdxSnapshot
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from .exceptions import WaybackError
+from .snapshot import CdxSnapshot
 from .utils import (
     _get_total_pages,
     _get_response,
@@ -9,7 +11,7 @@ from .utils import (
     _check_match_type,
     _add_payload,
 )
-from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 # TODO : Add get method here if type is Vaild HTML, SVG other but not - or warc. Test it.
 
@@ -26,7 +28,7 @@ class Cdx:
         gzip=None,
         collapses=[],
         limit=None,
-        use_page: bool =False,
+        use_page: bool = False,
         n_threads: int = 4,
     ):
         self.url = str(url).strip()
