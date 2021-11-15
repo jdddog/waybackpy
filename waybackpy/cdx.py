@@ -26,6 +26,7 @@ class Cdx:
         gzip=None,
         collapses=[],
         limit=None,
+        use_page: bool =False,
         n_threads: int = 4,
     ):
         self.url = str(url).strip()
@@ -41,7 +42,7 @@ class Cdx:
         _check_collapses(self.collapses)
         self.limit = limit if limit else 5000
         self.last_api_request_url = None
-        self.use_page = False
+        self.use_page = use_page
         self.n_threads = n_threads
 
     def cdx_api_manager(self, payload, headers, use_page=False):

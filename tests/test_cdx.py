@@ -3,6 +3,22 @@ from waybackpy.cdx import Cdx
 from waybackpy.exceptions import WaybackError
 
 
+def test_multithread_cdx():
+    url = "https://github.com"
+    user_agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, \
+        like Gecko) Chrome/45.0.2454.85 Safari/537.36"
+
+    # Test multithreading
+    cdx = Cdx(url=url, user_agent=user_agent, limit=50, use_page=True, n_threads=4)
+    snapshots = cdx.snapshots()
+    c = 0
+    for snapshot in snapshots:
+        print(snapshot.archive_url)
+        c += 1
+        if c > 100:
+            break
+
+
 def test_all_cdx():
     url = "akamhy.github.io"
     user_agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, \
