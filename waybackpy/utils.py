@@ -481,8 +481,8 @@ def _get_response(
     params=None,
     headers=None,
     return_full_url=False,
-    retries=5,
-    backoff_factor=0.5,
+    retries=10,
+    backoff_factor=2,
     no_raise_on_redirects=False,
 ):
     """Makes get requests.

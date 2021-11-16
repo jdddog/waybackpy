@@ -23,7 +23,10 @@ class CdxSnapshot:
         """
         self.urlkey = properties["urlkey"]
         self.timestamp = properties["timestamp"]
-        self.datetime_timestamp = datetime.strptime(self.timestamp, "%Y%m%d%H%M%S")
+        try:
+            self.datetime_timestamp = datetime.strptime(self.timestamp, "%Y%m%d%H%M%S")
+        except ValueError:
+            self.datetime_timestamp = None
         self.original = properties["original"]
         self.mimetype = properties["mimetype"]
         self.statuscode = properties["statuscode"]
