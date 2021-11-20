@@ -1,14 +1,14 @@
 import re
 import time
-import backoff
-import requests
 from datetime import datetime
 
-from .exceptions import WaybackError, URLError, RedirectSaveError
-from .__version__ import __version__
-
-from urllib3.util.retry import Retry
+import backoff
+import requests
 from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+from .__version__ import __version__
+from .exceptions import WaybackError, URLError, RedirectSaveError
 
 quote = requests.utils.quote
 default_user_agent = "waybackpy python package - https://github.com/akamhy/waybackpy"
@@ -478,10 +478,10 @@ def _wayback_timestamp(**kwargs):
 
 
 @backoff.on_exception(backoff.expo,
-                      requests.exceptions.RequestException,
-                      max_tries=10,
-                      max_time=600,
-                      jitter=backoff.full_jitter)
+                     (ConnectionError, requests.exceptions.RequestException),
+                     max_tries=10,
+                     max_time=600,
+                     jitter=backoff.full_jitter)
 def _get_response(
     endpoint,
     params=None,
