@@ -1,5 +1,6 @@
 import re
 import time
+import backoff
 import requests
 from datetime import datetime
 
@@ -476,6 +477,11 @@ def _wayback_timestamp(**kwargs):
     )
 
 
+@backoff.on_exception(backoff.expo,
+                      requests.exceptions.RequestException,
+                      max_tries=10,
+                      max_time=600,
+                      jitter=backoff.full_jitter)
 def _get_response(
     endpoint,
     params=None,
