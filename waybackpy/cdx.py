@@ -26,6 +26,8 @@ class Cdx:
         gzip=None,
         collapses=[],
         limit=None,
+        retries=5,
+        backoff_factor=0.5
     ):
         self.url = str(url).strip()
         self.user_agent = str(user_agent) if user_agent else default_user_agent
@@ -41,6 +43,8 @@ class Cdx:
         self.limit = limit if limit else 5000
         self.last_api_request_url = None
         self.use_page = False
+        self.retries = retries
+        self.backoff_factor = backoff_factor
 
     def cdx_api_manager(self, payload, headers, use_page=False):
         """Act as button, we can choose between the normal API and pagination API.
@@ -107,9 +111,9 @@ class Cdx:
             for i in range(total_pages):
                 payload["page"] = str(i)
                 url, res = _get_response(
-                    endpoint, params=payload, headers=headers, return_full_url=True
+                    endpoint, params=payload, headers=headers, return_full_url=True, retries=self.retries,
+                    backoff_factor=self.backoff_factor
                 )
-
                 self.last_api_request_url = url
                 text = res.text
                 if len(text) == 0:
@@ -132,7 +136,8 @@ class Cdx:
                     payload["resumeKey"] = resumeKey
 
                 url, res = _get_response(
-                    endpoint, params=payload, headers=headers, return_full_url=True
+                    endpoint, params=payload, headers=headers, return_full_url=True, retries=self.retries,
+                    backoff_factor=self.backoff_factor
                 )
 
                 self.last_api_request_url = url
